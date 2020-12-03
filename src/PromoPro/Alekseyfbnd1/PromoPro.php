@@ -8,14 +8,16 @@ use pocketmine\{Server, Player};
 
 class PromoPro extends PluginBase {
 
-  public $base;
+  public $promo;
+  public $users;
     
   public function onEnable () {
     if (!is_dir($this->getDataFolder())) {
       mkdir($this->getDataFolder());
     }
     
-    $this->base = new SQLite3($this, "promo");
+    $this->promo = new SQLite3($this, "promo");
+    $this->users = new SQLite3($this, "users");
   }
   
   public function onCommand (CommandSender $sender, Command $cmd, string $label, array $args) :bool {
