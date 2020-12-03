@@ -32,9 +32,9 @@ class PromoPro extends PluginBase {
                   $this->promo->bind(":promo_name", $args[1]);
                   $this->promo->execute();
                   if (count($this->promo->get()) == 0) {
-                    $this->promo->prepare("INSERT INTO promo (promo_name, promo_count, promo_time, promo_value) VALUES (:promo_name, :promo_count, :promo_time, :promo_value)");
+                    $this->promo->prepare("INSERT INTO promo (promo_name, promo_maxcount, promo_time, promo_value) VALUES (:promo_name, :promo_maxcount, :promo_time, :promo_value)");
                     $this->promo->bind(":promo_name", $args[1]);
-                    $this->promo->bind(":promo_count", $args[3]);
+                    $this->promo->bind(":promo_maxcount", $args[3]);
                     $this->promo->bind(":promo_time", time() + $args[2]);
                     $this->promo->bind(":promo_value", $args[4]);
                     $this->promo->execute();
@@ -57,10 +57,75 @@ class PromoPro extends PluginBase {
             }
           }
           if ($args[0] == "remove" && $sender->isOp()) {
-            
+            if (isset($args[1])) {
+              $this->promo->prepare("SELECT * FROM promo WHERE promo_name = :promo_name");
+              $this->promo->bind(":promo_name", $args[1]);
+              $this->promo->execute();
+              if (count($this->promo->get()) != 0) {
+                $this->promo->prepare("DELETE FROM promo WHERE promo_name = :promo_name");
+                $this->promo->bind(":promo_name", $args[1]);
+                $this->promo->execute();
+                $ssender->sendMessage("Ты успешно удалил промокод!");
+              }
+              else {
+                $sender->sendMessage("Такого промокода не существует!");
+            }
+            else {
+              $sender->sendMessage("/remove [название]");
+            }
           }
           if ($args[0] == "get") {
-            
+            if (isset($args[1])) {
+              $this->promo->prepare("SELECT * FROM promo WHERE promo_name = :promo_name");
+              $this->promo->bind(":promo_name", $args[1]);
+              $this->promo->execute();
+               if (count($this->promo->get()) != 0) {
+                 $this->users->prepare("SELECT * FROM users WHERE promo_name = :promo_name AND name = :name");
+                 $this->users->bind(":promo_name", $args[1]);
+                 $this->users->bind(":name", $sender->getName());
+                 $this->users->execute();
+                 if (count($this->users->get()) == 0) {
+                   $this->promo->prepare("SELECT * FROM promo WHERE promo_name = :promo_name");
+                   $this->promo->bind(":promo_name", $args[1]);
+                   $this->promo->execute();
+                   $promo = $this->promo->get();
+                   $promo_maxcount = $promo["promo_maxcount"];
+                   $promo_count = $promo["promo_count"];
+                   $promo_time = $promo["promo_time"];
+                   $promo_value = $promo["promo_value"];
+                   if ($promo_count >= $promo_maxcount) {
+                     $sender->sendMessage("Промокод закончился!");
+                   }
+                   else {
+                     if ($promo_time <= time()) {
+                       $sender->sendMessage("Промокод закончился!");
+                     }
+                     else {
+                       $this->promo->prepare("UPDATE promo SET promo_count = :promo_count WHERE promo_name = :promo_name");
+                       $this->promo->bind(":promo_name", $args[1]);
+                       $this->promo->bind(":promo_count", $promo_count + 1);
+                       $this->promo->execute();
+                       $this->users->prepare("INSERT INTO users (name, promo_name) VALUES (:name, :promo_name)");
+                       $this->users->bind(":promo_name", $args[1]);
+                       $this->users->bind(":name", $sender->getName());
+                       $this->users->execute();
+                       $eco = $this->getServer()->getPluginManager()->getPlugin("EconomyAPI");
+                       $eco->addMoney($sender->getName(), $promo_value);
+                       $sender->sendMessage("Ты успешно использовал промокод, твой приз: {$promo_value}$");
+                     }
+                   }
+                 }
+                 else {
+                   $sender->sendMessage("Ты уже использовал промокод!");
+                 }
+               }
+              else {
+                $sender->sendMessage("Такого промокода не существует!");
+              }
+            }
+            else {
+               $sender->sendMessage("/get [название]");
+            }
           }
         }
         else {
