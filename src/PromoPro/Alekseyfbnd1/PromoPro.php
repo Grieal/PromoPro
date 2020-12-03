@@ -90,10 +90,10 @@ class PromoPro extends PluginBase {
                    $this->promo->bind(":promo_name", $args[1]);
                    $this->promo->execute();
                    $promo = $this->promo->get();
-                   $promo_maxcount = $promo[1];
-                   $promo_count = $promo[2];
-                   $promo_time = $promo[3];
-                   $promo_value = $promo[4];
+                   $promo_maxcount = $promo[1]["promo_maxcount"];
+                   $promo_count = $promo[2]["promo_count"];
+                   $promo_time = $promo[3]["promo_time"];
+                   $promo_value = $promo[4]["promo_value"];
                    if ($promo_count >= $promo_maxcount) {
                      $sender->sendMessage("Промокод закончился!");
                    }
