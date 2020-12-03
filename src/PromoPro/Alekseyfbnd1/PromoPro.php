@@ -65,7 +65,7 @@ class PromoPro extends PluginBase {
                 $this->promo->prepare("DELETE FROM promo WHERE promo_name = :promo_name");
                 $this->promo->bind(":promo_name", $args[1]);
                 $this->promo->execute();
-                $ssender->sendMessage("Ты успешно удалил промокод!");
+                $sender->sendMessage("Ты успешно удалил промокод!");
               }
               else {
                 $sender->sendMessage("Такого промокода не существует!");
