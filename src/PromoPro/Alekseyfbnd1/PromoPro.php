@@ -69,6 +69,7 @@ class PromoPro extends PluginBase {
               }
               else {
                 $sender->sendMessage("Такого промокода не существует!");
+              }
             }
             else {
               $sender->sendMessage("/remove [название]");
@@ -133,6 +134,7 @@ class PromoPro extends PluginBase {
         }
       break;
     }
+    return true;
   }
   
 }
